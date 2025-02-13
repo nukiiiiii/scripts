@@ -1,0 +1,496 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "🌋🌋Volcano hub arsenal🌋🌋",
+    Icon = 0,
+    LoadingTitle = "Volcano hub is loading",
+    LoadingSubtitle = "by nukii",
+    Theme = "Default",
+
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = nil,
+        FileName = "Big Hub"
+    },
+
+    Discord = {
+        Enabled = true,
+        Invite = "https://discord.gg/gsrwh34W",
+        RememberJoins = true
+    },
+
+    KeySystem = true,
+    KeySettings = {
+        Title = "Volcano Hub 2025",
+        Subtitle = "Key System",
+        Note = "Looking for key? Join on discord discord.gg/gsrwh34W",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = true,
+        Key = {"afasfdafa"}
+    }
+})
+
+local InfiniteJumpEnabled = false
+
+local MainTab = Window:CreateTab("Universal", nil)
+local Section = MainTab:CreateSection("Universal Cheats")
+
+local Toggle = MainTab:CreateToggle({
+    Name = "Infinite Jump",
+    CurrentValue = false,
+    Flag = "Toggle1",
+    Callback = function(Value)
+        InfiniteJumpEnabled = Value
+    end,
+})
+
+game:GetService("UserInputService").JumpRequest:connect(function()
+    if InfiniteJumpEnabled then
+        game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
+    end
+end)
+
+local Slider = MainTab:CreateSlider({
+    Name = "Speed",
+    Range = {0, 300},
+    Increment = 1,
+    Suffix = "",
+    CurrentValue = 16,
+    Flag = "Slider1",
+    Callback = function(Value)
+        local jogador = game.Players.LocalPlayer
+        local personagem = jogador.Character or jogador.CharacterAdded:Wait()
+        local humanoide = personagem:WaitForChild("Humanoid")
+        humanoide.WalkSpeed = Value
+    end,
+})
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local camera = game.Workspace.CurrentCamera
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+
+local flySpeed = 60
+local maxFlySpeed = 500
+local flyVelocity, flyControl
+local isFlying = false
+
+local function startFly()
+    humanoid.PlatformStand = true
+    flyVelocity = Instance.new("BodyVelocity")
+    flyVelocity.Velocity = Vector3.new(0, 0, 0)
+    flyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+    flyVelocity.Parent = rootPart
+    flyControl = Instance.new("BodyGyro")
+    flyControl.CFrame = rootPart.CFrame
+    flyControl.MaxTorque = Vector3.new(100000, 100000, 100000)
+    flyControl.P = 10000
+    flyControl.Parent = rootPart
+end
+
+local function stopFly()
+    if flyVelocity then flyVelocity:Destroy() end
+    if flyControl then flyControl:Destroy() end
+    humanoid.PlatformStand = false
+end
+
+local function updateFly()
+    local moveDirection = Vector3.new(0, 0, 0)
+    if userInputService:IsKeyDown(Enum.KeyCode.W) then
+        moveDirection = moveDirection + camera.CFrame.LookVector
+    end
+    if userInputService:IsKeyDown(Enum.KeyCode.S) then
+        moveDirection = moveDirection - camera.CFrame.LookVector
+    end
+    if userInputService:IsKeyDown(Enum.KeyCode.A) then
+        moveDirection = moveDirection - camera.CFrame.RightVector
+    end
+    if userInputService:IsKeyDown(Enum.KeyCode.D) then
+        moveDirection = moveDirection + camera.CFrame.RightVector
+    end
+    if userInputService:IsKeyDown(Enum.KeyCode.Space) then
+        moveDirection = moveDirection + Vector3.new(0, 1, 0)
+    end
+    if userInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+        moveDirection = moveDirection - Vector3.new(0, 1, 0)
+    end
+
+    if moveDirection.Magnitude > 0 then
+        flyVelocity.Velocity = moveDirection.Unit * flySpeed
+    else
+        flyVelocity.Velocity = Vector3.new(0, 0, 0)
+    end
+
+    flyControl.CFrame = CFrame.new(rootPart.Position, rootPart.Position + camera.CFrame.LookVector)
+end
+
+runService.RenderStepped:Connect(function()
+    if isFlying then
+        updateFly()
+    end
+end)
+
+local FlyToggle = MainTab:CreateToggle({
+    Name = "Fly",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(Value)
+        isFlying = Value
+        if isFlying then
+            startFly()
+        else
+            stopFly()
+        end
+    end,
+})
+
+userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end  -- Ignora se o evento já foi processado (por exemplo, se o foco estiver no chat)
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.F then
+        if FlyToggle.CurrentValue then  -- Só ativa/desativa se o FlyToggle estiver ativado
+            isFlying = not isFlying  -- Alterna entre ativado e desativado
+            if isFlying then
+                startFly()  -- Ativa o voo
+            else
+                stopFly()  -- Desativa o voo
+            end
+            FlyToggle:SetValueWithoutCallback(isFlying)  -- Atualiza o toggle visualmente
+        end
+    end
+end)
+
+
+local FlySpeedSlider = MainTab:CreateSlider({
+    Name = "Fly Speed",
+    Range = {0, 500},
+    Increment = 10,
+    Suffix = "Speed",
+    CurrentValue = 60,
+    Flag = "FlySpeedSlider",
+    Callback = function(Value)
+        flySpeed = Value
+    end,
+})
+
+local AimbotTab = Window:CreateTab("Aimbot", nil)
+local Section = AimbotTab:CreateSection("Aimbot hold Mouse2 to activate")
+
+local AimbotEnabled = false
+
+local AimbotToggle = AimbotTab:CreateToggle({
+    Name = "Aimbot",
+    CurrentValue = false,
+    Flag = "ToggleAimbot",
+    Callback = function(Value)
+        AimbotEnabled = Value
+    end,
+})
+
+local mouse = game.Players.LocalPlayer:GetMouse()
+local userInputService = game:GetService("UserInputService")
+
+local function aimbot()
+    if AimbotEnabled then
+        if userInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+            local closestPlayer = nil
+            local shortestDistance = math.huge
+            for _, target in pairs(game.Players:GetPlayers()) do
+                if target ~= game.Players.LocalPlayer and target.Character and target.Character:FindFirstChild("Head") then
+                    -- Verifica se o jogador está do time oposto
+                    if target.Team ~= game.Players.LocalPlayer.Team then
+                        local targetPosition = target.Character.Head.Position
+                        local distance = (mouse.Hit.p - targetPosition).magnitude
+                        if distance < shortestDistance then
+                            shortestDistance = distance
+                            closestPlayer = target
+                        end
+                    end
+                end
+            end
+
+            if closestPlayer then
+                local targetPosition = closestPlayer.Character.Head.Position
+                camera.CFrame = CFrame.new(camera.CFrame.Position, targetPosition)
+            end
+        end
+    end
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    aimbot()
+end)
+
+local settings = {
+    enabled = false,
+    teamCheck = true,  -- Ativar Team Check por padrão
+}
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local wtf = {}
+
+function esp(player)
+    if not settings.enabled then return end
+    if settings.teamCheck and (not player.Team or player.Team == Players.LocalPlayer.Team) then return end
+    if player == Players.LocalPlayer then return end
+
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    local Box = Drawing.new("Square")
+    Box.Color = Color3.new(1, 0, 0)
+    Box.Thickness = 2
+    Box.Transparency = 1
+    Box.Filled = false
+
+    local tracer = Drawing.new("Line")
+    tracer.Color = Color3.new(1, 0, 0)
+    tracer.Thickness = 1
+    tracer.Transparency = 1
+
+    local name = Drawing.new("Text")
+    name.Text = player.Name
+    name.Color = Color3.new(1, 1, 1)
+    name.Size = 20
+    name.Center = true
+    name.Outline = true
+    name.Transparency = 1
+
+    wtf[player] = {box = Box, tracer = tracer, name = name}
+
+    local wasVisible = false
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            Box.Visible = false
+            tracer.Visible = false
+            name.Visible = false
+            return
+        end
+
+        local hrpPosition, onScreen = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position)
+        if onScreen then
+            local top = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position + Vector3.new(0, 3, 0))
+            local bottom = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position - Vector3.new(0, 3, 0))
+            local size = Vector2.new(math.abs(top.X - bottom.X) * 1.5, math.abs(top.Y - bottom.Y) * 1.5)
+            Box.Size = size
+            Box.Position = Vector2.new(hrpPosition.X - size.X / 2, hrpPosition.Y - size.Y / 2)
+
+            if not wasVisible then
+                Box.Visible = true
+                tracer.Visible = true
+                name.Visible = true
+                wasVisible = true
+            end
+
+            tracer.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y)
+            tracer.To = Vector2.new(hrpPosition.X, hrpPosition.Y)
+
+            name.Position = Vector2.new(hrpPosition.X, hrpPosition.Y - size.Y / 2 - 20)
+        else
+            if wasVisible then
+                Box.Visible = false
+                tracer.Visible = false
+                name.Visible = false
+                wasVisible = false
+            end
+        end
+    end)
+
+    wtf[player].connection = connection
+end
+
+function remove(player)
+    if wtf[player] then
+        if wtf[player].connection then
+            wtf[player].connection:Disconnect()
+        end
+        wtf[player].box:Remove()
+        wtf[player].tracer:Remove()
+        wtf[player].name:Remove()
+        wtf[player] = nil
+    end
+end
+
+function updateESPForPlayer(player)
+    -- Remove e adiciona o ESP sempre que o time for alterado
+    remove(player)
+    esp(player)
+end
+
+function add(player)
+    player.CharacterAdded:Connect(function(character)
+        esp(player)
+    end)
+    player.CharacterRemoving:Connect(function(character)
+        remove(player)
+    end)
+
+    -- Atualiza o ESP sempre que o time do jogador mudar
+    player:GetPropertyChangedSignal("Team"):Connect(function()
+        updateESPForPlayer(player)
+    end)
+
+    if player.Character then
+        esp(player)
+    end
+end
+
+Players.PlayerAdded:Connect(add)
+
+for _, player in pairs(Players:GetPlayers()) do
+    add(player)
+end
+
+Players.LocalPlayer:GetPropertyChangedSignal("Team"):Connect(function()
+    settings.teamCheck = Players.LocalPlayer.Team ~= nil
+    -- Reaplica o ESP para todos os jogadores
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character then
+            remove(player)
+            esp(player)
+        end
+    end
+end)
+
+local ESPTab = Window:CreateTab("ESP", nil)
+local Section = ESPTab:CreateSection("ESP")
+
+local Toggle = ESPTab:CreateToggle({
+    Name = "ESP",
+    CurrentValue = false,
+    Flag = "ToggleESP",
+    Callback = function(Value)
+        settings.enabled = Value
+        if not Value then
+            for _, player in pairs(Players:GetPlayers()) do
+                remove(player)
+            end
+        else
+            for _, player in pairs(Players:GetPlayers()) do
+                if player.Character then
+                    esp(player)
+                end
+            end
+        end
+    end,
+})
+
+local TeamCheckToggle = ESPTab:CreateToggle({
+    Name = "Team Check",
+    CurrentValue = true,
+    Flag = "TeamCheckToggle",
+    Callback = function(Value)
+        settings.teamCheck = Value
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                remove(player)
+                esp(player)
+            end
+        end
+    end,
+})
+
+local espColor = Color3.fromRGB(255, 255, 255)  -- Cor inicial (branco)
+
+local function updateESPColor()
+    for _, data in pairs(wtf) do
+        if data.box then
+            data.box.Color = espColor
+        end
+        if data.tracer then
+            data.tracer.Color = espColor
+        end
+        if data.name then
+            data.name.Color = espColor
+        end
+    end
+end
+
+local ColorPicker = ESPTab:CreateColorPicker({
+    Name = "ESP Color",
+    Color = espColor,  -- Cor inicial do picker
+    Flag = "ColorPicker1",  -- A flag é o identificador para o arquivo de configuração
+    Callback = function(Value)
+        espColor = Value  -- Atualiza a cor quando o usuário mudar no ColorPicker
+        updateESPColor()  -- Atualiza a cor de todos os ESPs ativos
+    end
+})
+
+function esp(player)
+    if not settings.enabled then return end
+    if settings.teamCheck and (not player.Team or player.Team == Players.LocalPlayer.Team) then return end
+    if player == Players.LocalPlayer then return end
+
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    local Box = Drawing.new("Square")
+    Box.Color = espColor  -- Usando a cor do ESP
+    Box.Thickness = 2
+    Box.Transparency = 1
+    Box.Filled = false
+
+    local tracer = Drawing.new("Line")
+    tracer.Color = espColor  -- Usando a cor do ESP
+    tracer.Thickness = 1
+    tracer.Transparency = 1
+
+    local name = Drawing.new("Text")
+    name.Text = player.Name
+    name.Color = Color3.fromRGB(255, 255, 255)  -- Texto sempre em branco (pode ser ajustado se necessário)
+    name.Size = 20
+    name.Center = true
+    name.Outline = true
+    name.Transparency = 1
+
+    wtf[player] = {box = Box, tracer = tracer, name = name}
+
+    local wasVisible = false
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            Box.Visible = false
+            tracer.Visible = false
+            name.Visible = false
+            return
+        end
+
+        local hrpPosition, onScreen = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position)
+        if onScreen then
+            local top = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position + Vector3.new(0, 3, 0))
+            local bottom = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position - Vector3.new(0, 3, 0))
+            local size = Vector2.new(math.abs(top.X - bottom.X) * 1.5, math.abs(top.Y - bottom.Y) * 1.5)
+            Box.Size = size
+            Box.Position = Vector2.new(hrpPosition.X - size.X / 2, hrpPosition.Y - size.Y / 2)
+
+            if not wasVisible then
+                Box.Visible = true
+                tracer.Visible = true
+                name.Visible = true
+                wasVisible = true
+            end
+
+            tracer.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y)
+            tracer.To = Vector2.new(hrpPosition.X, hrpPosition.Y)
+
+            name.Position = Vector2.new(hrpPosition.X, hrpPosition.Y - size.Y / 2 - 20)
+        else
+            if wasVisible then
+                Box.Visible = false
+                tracer.Visible = false
+                name.Visible = false
+                wasVisible = false
+            end
+        end
+    end)
+
+    wtf[player].connection = connection
+end
