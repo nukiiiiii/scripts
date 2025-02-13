@@ -18,7 +18,7 @@ local Window = Rayfield:CreateWindow({
 
     Discord = {
         Enabled = true,
-        Invite = "https://discord.gg/gsrwh34W",
+        Invite = "SUavydmgS",
         RememberJoins = true
     },
 
@@ -26,11 +26,11 @@ local Window = Rayfield:CreateWindow({
     KeySettings = {
         Title = "Volcano Hub 2025",
         Subtitle = "Key System",
-        Note = "Looking for key? Join on discord discord.gg/gsrwh34W",
+        Note = "Looking for key? Join on discord discord.gg/SUa2vydmgS",
         FileName = "Key",
         SaveKey = true,
         GrabKeyFromSite = true,
-        Key = {"afasfdafa"}
+        Key = {"https://pastebin.com/raw/0urLw9tt", "admseboosterusemessakey"}
     }
 })
 
